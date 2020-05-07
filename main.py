@@ -2,14 +2,24 @@ import argparse
 import itertools
 from math import ceil
 from multiprocessing import Pool
-import time
+from datetime import datetime
 
 parser = argparse.ArgumentParser()
-parser.add_argument("length", help="The maximum length of an upgrade permutation to check", type=int)
-parser.add_argument("turncount", help="The number of turns over which to check these permutations", type=int)
-parser.add_argument("-v", "--verbose", help="Print debugging information", action="store_true")
-parser.add_argument("-j", "--jobs", help="Multithreading", type=int, default = None)
+parser.add_argument("length", help="the maximum length of an upgrade permutation to check", type=int)
+parser.add_argument("turncount", help="the number of turns over which to check these permutations", type=int)
+parser.add_argument("-v", "--verbose", help="never, NEVER use this", action="store_true")
+parser.add_argument("-j", "--jobs", help="multithreading with N jobs", type=int, default = None)
+priorityGroup = parser.add_mutually_exclusive_group(required=True)
+priorityGroup.add_argument("-i", "--prioritize-income", help="the best upgrade permutation has the most income", action="store_true")
+priorityGroup.add_argument("-m", "--prioritize-money", help="the best upgrade permutation has the most money", action="store_true")
 args = parser.parse_args()
+if __name__ == "__main__":
+    if args.prioritize_income:
+        print("Prioritizing permutations that end with the most income.")
+    elif args.prioritize_money:
+        print("Prioritizing permutations that end with the most money.")
+    else:
+        print("Error: unknown priority. This message should not appear.")
 
 MONEY_PER = 0
 STREAK_BONUS = 1
@@ -85,28 +95,34 @@ def moneyIncome(perm):
     money, indices = evaluatePermOverTurns(perm, args.turncount)
     income = moneyPerQuestion(indices)
     return money, income
-def getBestPerm(perms, printInfo = False):
+
+def getBestPerm(perms):
     bestPerm = [[], 0, 0]
     for perm in perms:
         money, income = moneyIncome(perm)
-        if printInfo and args.verbose:
+        if args.verbose:
             print(f"{perm}: ${money}, income of ${income}")
-        if income > bestPerm[2] or (income == bestPerm[2] and money > bestPerm[1]):
-            bestPerm = [perm, money, income]
+        if args.prioritize_income:
+            if income > bestPerm[2] or (income == bestPerm[2] and money > bestPerm[1]):
+                bestPerm = [perm, money, income]
+        else:
+            if money > bestPerm[1] or (money == bestPerm[1] and income > bestPerm[2]):
+                bestPerm = [perm, money, income]
     return bestPerm
 
+def filterBadPerm(perm):
+    return perm.count(0) < 10 and perm.count(1) < 10 and perm.count(2) < 10
+
 bestPerm = "This message should not appear :)"
-permList = sorted(set(itertools.permutations([0] * 9 + [1] * 9 + [2] * 9, args.length)))
-if args.jobs:
-    if __name__ == '__main__':
+if __name__ == '__main__':
+    print("Timestamp:", datetime.now().time())
+    permList = list(filter(filterBadPerm, itertools.product([0, 1, 2], repeat=args.length)))
+    print(len(permList), "permutations to check.")
+    if args.jobs:
         print(f"Initializing pool with {args.jobs} jobs") 
         chunks = [permList[i::args.jobs] for i in range(args.jobs)]
         pool = Pool(args.jobs)
-        result = pool.map_async(getBestPerm, chunks)
-        while not result.ready():
-            pass
-        bestPerms = result.get()
-        bestPerm = getBestPerm([i[0] for i in result.get()])
-else:
-    bestPerm = getBestPerm(permList, True)
-print(f"The best permutation was {bestPerm[0]}, which made ${bestPerm[1]} with an income of ${bestPerm[2]}.")
+        bestPerm = getBestPerm([i[0] for i in pool.map(getBestPerm, chunks, 1)])
+    else:
+        bestPerm = getBestPerm(permList)
+    print(f"The best permutation was {bestPerm[0]}, which made ${bestPerm[1]} with an income of ${bestPerm[2]}.")
