@@ -136,10 +136,6 @@ def upgradesBought(perm):
 def prettyPrintPerm(perm):
     return [nameUpgrade(upgrade) for upgrade in perm]
 
-perm = [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]
-evaluatePermOverTurns(perm)
-print(f"Purchased {upgradesBought(perm)}/{len(perm)} upgrades.")
-exit()
 bestPerm = "This message should not appear :)"
 if __name__ == '__main__':
     print("Timestamp:", datetime.now().time())
