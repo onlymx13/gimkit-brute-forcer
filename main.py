@@ -118,12 +118,12 @@ def upgradesBought(perm):
     turns = 1 # so it's already been 1 turn
     indices = [0, 0, 0] # moneyPer, streakBonus, multiplier
     for upgradeIndex in range(len(perm)):
-        upgrade = perm(upgradeIndex)
+        upgrade = perm[upgradeIndex]
         while money < upgradeCosts[upgrade][indices[upgrade] + 1]:
             turns += 1
             money += moneyPerQuestion(indices)
-            if turns >= totalTurns:
-                print("Unable to buy upgrades past index {upgradeIndex}")
+            if turns >= args.turncount:
+                print(f"Unable to buy upgrades past index {upgradeIndex}, which costs ${upgradeCosts[upgrade][indices[upgrade] + 1]}")
                 return
         money -= upgradeCosts[upgrade][indices[upgrade] + 1]
         indices[upgrade] += 1
