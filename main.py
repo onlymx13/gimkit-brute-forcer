@@ -113,6 +113,22 @@ def getBestPerm(perms):
 def filterBadPerm(perm):
     return perm.count(0) < 10 and perm.count(1) < 10 and perm.count(2) < 10
 
+def upgradesBought(perm):
+    money = 1 # If you get all questions right, we can just hardcode turn 1
+    turns = 1 # so it's already been 1 turn
+    indices = [0, 0, 0] # moneyPer, streakBonus, multiplier
+    for upgradeIndex in range(len(perm)):
+        upgrade = perm(upgradeIndex)
+        while money < upgradeCosts[upgrade][indices[upgrade] + 1]:
+            turns += 1
+            money += moneyPerQuestion(indices)
+            if turns >= totalTurns:
+                print("Unable to buy upgrades past index {upgradeIndex}")
+                return
+        money -= upgradeCosts[upgrade][indices[upgrade] + 1]
+        indices[upgrade] += 1
+    print("Able to buy all upgrades")
+
 bestPerm = "This message should not appear :)"
 if __name__ == '__main__':
     print("Timestamp:", datetime.now().time())
@@ -126,3 +142,4 @@ if __name__ == '__main__':
     else:
         bestPerm = getBestPerm(permList)
     print(f"The best permutation was {bestPerm[0]}, which made ${bestPerm[1]} with an income of ${bestPerm[2]}.")
+    upgradesBought(bestPerm[0])
