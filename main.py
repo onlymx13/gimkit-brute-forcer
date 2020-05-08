@@ -60,7 +60,7 @@ def questionsToGet(permutation):
             print(f"Purchased upgrade {nameUpgrade(upgrade)}. Money is now {money}")
     return turns, money
 
-def evaluatePermOverTurns(permutation, totalTurns):
+def evaluatePermOverTurns(permutation):
     money = 1 # If you get all questions right, we can just hardcode turn 1
     turns = 1 # so it's already been 1 turn
     indices = [0, 0, 0] # moneyPer, streakBonus, multiplier
@@ -72,7 +72,7 @@ def evaluatePermOverTurns(permutation, totalTurns):
             money += moneyPerQuestion(indices)
             if args.verbose:
                 print(f"Turn {turns}: Money is now {money}")
-            if turns >= totalTurns:
+            if turns >= args.turncount:
                 return money, indices
         money -= upgradeCosts[upgrade][indices[upgrade] + 1]
         indices[upgrade] += 1
@@ -93,7 +93,7 @@ def evaluatePermOverTurns(permutation, totalTurns):
 #    return False
 
 def moneyIncome(perm):
-    money, indices = evaluatePermOverTurns(perm, args.turncount)
+    money, indices = evaluatePermOverTurns(perm)
     income = moneyPerQuestion(indices)
     return money, income
 
@@ -133,6 +133,13 @@ def upgradesBought(perm):
         indices[upgrade] += 1
     return sum(indices)
 
+def prettyPrintPerm(perm):
+    return [nameUpgrade(upgrade) for upgrade in perm]
+
+perm = [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]
+evaluatePermOverTurns(perm)
+print(f"Purchased {upgradesBought(perm)}/{len(perm)} upgrades.")
+exit()
 bestPerm = "This message should not appear :)"
 if __name__ == '__main__':
     print("Timestamp:", datetime.now().time())
@@ -145,5 +152,5 @@ if __name__ == '__main__':
         bestPerm = getBestPerm([i[0] for i in pool.map(getBestPerm, chunks, 1)])
     else:
         bestPerm = getBestPerm(permList)
-    print(f"The best permutation was {bestPerm[0]}, which made ${bestPerm[1]} with an income of ${bestPerm[2]}.")
+    print(f"The best permutation was {prettyPrintPerm(bestPerm[0])}, which made ${bestPerm[1]} with an income of ${bestPerm[2]}.")
     print(f"Purchased {upgradesBought(bestPerm[0])}/{args.length} upgrades.")
