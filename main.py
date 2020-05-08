@@ -12,6 +12,7 @@ parser.add_argument("-j", "--jobs", help="multithreading with N jobs", type=int,
 priorityGroup = parser.add_mutually_exclusive_group(required=True)
 priorityGroup.add_argument("-i", "--prioritize-income", help="the best upgrade permutation has the most income", action="store_true")
 priorityGroup.add_argument("-m", "--prioritize-money", help="the best upgrade permutation has the most money", action="store_true")
+parser.add_argument("-l", "--little-bit-verbose", help="please merge with -v or just delete -v", action="store_true")
 args = parser.parse_args()
 if __name__ == "__main__":
     if args.prioritize_income:
@@ -122,12 +123,15 @@ def upgradesBought(perm):
         while money < upgradeCosts[upgrade][indices[upgrade] + 1]:
             turns += 1
             money += moneyPerQuestion(indices)
+            if args.little_bit_verbose:
+                print(f"Turn {turns}: Money is now {money}")
             if turns >= args.turncount:
-                print(f"Unable to buy upgrades past index {upgradeIndex}, which costs ${upgradeCosts[upgrade][indices[upgrade] + 1]}")
-                return
+                return sum(indices)
         money -= upgradeCosts[upgrade][indices[upgrade] + 1]
+        if args.little_bit_verbose:
+            print(f"Purchased upgrade {nameUpgrade(upgrade)} costing ${upgradeCosts[upgrade][indices[upgrade] + 1]}. Money is now ${money}.")
         indices[upgrade] += 1
-    print("Able to buy all upgrades")
+    return sum(indices)
 
 bestPerm = "This message should not appear :)"
 if __name__ == '__main__':
@@ -142,4 +146,4 @@ if __name__ == '__main__':
     else:
         bestPerm = getBestPerm(permList)
     print(f"The best permutation was {bestPerm[0]}, which made ${bestPerm[1]} with an income of ${bestPerm[2]}.")
-    upgradesBought(bestPerm[0])
+    print(f"Purchased {upgradesBought(bestPerm[0])}/{args.length} upgrades.")
