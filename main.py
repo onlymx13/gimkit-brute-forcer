@@ -74,10 +74,11 @@ def evaluatePermOverTurns(permutation):
                 print(f"Turn {turns}: Money is now {money}")
             if turns >= args.turncount:
                 return money, indices
-        money -= upgradeCosts[upgrade][indices[upgrade] + 1]
-        indices[upgrade] += 1
-        if args.verbose:
-            print(f"Purchased upgrade {nameUpgrade(upgrade)}. Money is now {money}")
+        while money >= upgradeCosts[upgrade][indices[upgrade] + 1]:
+            money -= upgradeCosts[upgrade][indices[upgrade] + 1]
+            indices[upgrade] += 1
+            if args.verbose:
+                print(f"Purchased upgrade {nameUpgrade(upgrade)}. Money is now {money}")
     return money, indices
         
 # This function doesn't work well. Not sure why.
@@ -127,10 +128,11 @@ def upgradesBought(perm):
                 print(f"Turn {turns}: Money is now {money}")
             if turns >= args.turncount:
                 return sum(indices)
-        money -= upgradeCosts[upgrade][indices[upgrade] + 1]
-        if args.little_bit_verbose:
-            print(f"Purchased upgrade {nameUpgrade(upgrade)} costing ${upgradeCosts[upgrade][indices[upgrade] + 1]}. Money is now ${money}.")
-        indices[upgrade] += 1
+        while money >= upgradeCosts[upgrade][indices[upgrade] + 1]:
+            money -= upgradeCosts[upgrade][indices[upgrade] + 1]
+            if args.little_bit_verbose:
+                print(f"Purchased upgrade {nameUpgrade(upgrade)} costing ${upgradeCosts[upgrade][indices[upgrade] + 1]}. Money is now ${money}.")
+            indices[upgrade] += 1
     return sum(indices)
 
 def prettyPrintPerm(perm):
